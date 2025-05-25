@@ -3,10 +3,47 @@
 class EnigmaMachine
   # временно
   attr_accessor :rotors
-  def initialize(rotors:, reflector:, plugboard: Plugboard.new)
+  def initialize(rotors:, reflector:, plugboard: Plugboard.new, ring_settings: nil)
     @rotors = rotors  # слева направо
     @reflector = reflector
     @plugboard = plugboard
+
+    default_ring = Array.new(@rotors.size, 1)
+    default_start = Array.new(@rotors.size, 'A')
+
+    @created_ring_settings = ring_settings ? ring_settings.dup : default_ring
+    @created_positions = start_positions ? start_positions.dup : default_start
+
+    @rotors.each_with_index do |rotor, i|
+      rotor.ring_setting = @created_ring_settings[i] - 1
+      rotor.position = Rotor::ALPHABET.index(@created_positions[i])
+    end
+  end
+
+  def set_ring_setting(rotor_index, ring_value)
+    @rotors[rotor_index].ring_setting = ring_value - 1
+  end
+
+  def set_start_position(rotor_index, letter)
+    @rotors[rotor_index].position = Rotor::ALPHABET.index(letter)
+  end
+
+  def current_ring_settings
+    @rotors.map { |r| r.ring_setting + 1 }
+  end
+
+  def reset_to_factory
+    @rotors.each do |rotor|
+      rotor.ring_setting = 0
+      rotor.position = Rotor::ALPHABET.index('A')
+    end
+  end
+
+  def reset_to_created
+    @rotors.each_with_index do |rotor, i|
+      rotor.ring_setting = @created_ring_settings[i] - 1
+      rotor.position = Rotor::ALPHABET.index(@created_positions[i])
+    end
   end
 
   def step_rotors
