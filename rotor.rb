@@ -13,6 +13,22 @@ class Rotor
     @position = ALPHABET.index(position) # текущая позиция ротора
   end
 
+  def self.rotor_I(ring_setting: 1, position: 'A')
+    new(wiring: 'EKMFLGDQVZNTOWYHXUSPAIBRCJ', notch: 'Q', ring_setting: ring_setting, position: position)
+  end
+  def self.rotor_II(ring_setting: 1, position: 'A')
+    new(wiring: 'AJDKSIRUXBLHWTMCQGZNPYFVOE', notch: 'E', ring_setting: ring_setting, position: position)
+  end
+  def self.rotor_III(ring_setting: 1, position: 'A')
+    new(wiring: 'BDFHJLCPRTXVZNYEIWGAKMUSQO', notch: 'V', ring_setting: ring_setting, position: position)
+  end
+  def self.rotor_IV(ring_setting: 1, position: 'A')
+    new(wiring: 'ESOVPZJAYQUIRHXLNFTGKDCMWB', notch: 'J', ring_setting: ring_setting, position: position)
+  end
+  def self.rotor_V(ring_setting: 1, position: 'A')
+    new(wiring: 'VZBRGITYUPSDNHLXAWMJQOFECK', notch: 'Z', ring_setting: ring_setting, position: position)
+  end
+
   def step!
     @position = (@position + 1) % 26
   end

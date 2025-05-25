@@ -4,10 +4,10 @@
   require_relative 'plugboard'
   require_relative 'enigma_machine'
 
-  rotor1 = Rotor.new(wiring: 'EKMFLGDQVZNTOWYHXUSPAIBRCJ', notch: 'Q')
-  rotor2 = Rotor.new(wiring: 'AJDKSIRUXBLHWTMCQGZNPYFVOE', notch: 'E')
-  rotor3 = Rotor.new(wiring: 'BDFHJLCPRTXVZNYEIWGAKMUSQO', notch: 'V')
-  reflector = Reflector.new('YRUHQSLDPXNGOKMIEBFZCWVJAT')
+  rotor1 = Rotor.rotor_I
+  rotor2 = Rotor.rotor_II
+  rotor3 = Rotor.rotor_III
+  reflector = Reflector.reflector_A
   plugboard = Plugboard.new([['A','M'],['F','I'],['N','V'],['P','S'],['T','U'],['W','Z']])
 
   machine = EnigmaMachine.new(
@@ -29,3 +29,6 @@
 
   decrypted = machine.decrypt(encrypted)
   puts "Decrypted: #{decrypted}"
+
+
+
