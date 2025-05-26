@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative 'lib/enigma_machine'
-require_relative 'lib/bombe_decryptor'
-require_relative 'lib/bombe'
+require_relative 'lib/enigma_machine/bombe_decryptor'
+require_relative 'lib/enigma_machine/bombe'
 #require_relative 'lib/bombe_decryptor_rotors_combo'
 
 rotor1 = EnigmaMachine::Rotor.rotor_I

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require_relative "enigma_machine"
+require_relative "../enigma_machine"
 
 module EnigmaMachine
   class TuringDecryptorLevelUp

@@ -1,6 +1,6 @@
 require 'minitest/autorun'
 require_relative '../lib/enigma_machine'
-require_relative '../lib/bombe_decryptor'
+require_relative '../lib/enigma_machine/bombe_decryptor'
 
 class TuringDecryptorAdditionalTest < Minitest::Test
   include EnigmaMachine

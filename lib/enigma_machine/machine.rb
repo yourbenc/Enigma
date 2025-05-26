@@ -2,7 +2,6 @@
 
 module EnigmaMachine
 class Machine
-  # временно
   attr_accessor :rotors
   def initialize(rotors:, reflector:, plugboard: Plugboard.new, ring_settings: nil, start_positions: nil)
     @rotors = rotors  # слева направо
