@@ -1,50 +1,38 @@
 module EnigmaMachine
   class Bombe
     def initialize(ciphertext, crib, base_rotors, reflector, plugboard)
-      @ciphertext = ciphertext
-      @crib = crib
-      @base_rotors = base_rotors # массив из 5 базовых роторов
-      @reflector = reflector
-      @plugboard = plugboard
+      @ciphertext   = ciphertext
+      @crib         = crib
+      @base_rotors  = base_rotors    # массив из 5 базовых роторов
+      @reflector    = reflector
+      @plugboard    = plugboard
+      @ring_settings   = [1, 1, 1]   # фиксированные кольцевые настройки
+      @start_positions = ['A', 'A', 'A'] # фиксированные стартовые позиции
     end
 
     def run
       possible_rotor_combinations.each do |rotors_combo|
-        (1..26).each do |r1|
-          (1..26).each do |r2|
-            (1..26).each do |r3|
-              ring_settings = [r1, r2, r3]
+        machine = EnigmaMachine::Machine.new(
+          rotors:           deep_clone_rotors(rotors_combo),
+          reflector:        @reflector,
+          plugboard:        @plugboard,
+          ring_settings:    @ring_settings,
+          start_positions:  @start_positions
+        )
 
-              ('A'..'Z').each do |p1|
-                ('A'..'Z').each do |p2|
-                  ('A'..'Z').each do |p3|
-                    start_positions = [p1, p2, p3]
+        snippet = machine.decrypt(@ciphertext[0...@crib.length])
+        next unless matches_crib?(snippet, @crib)
 
-                    machine = EnigmaMachine::Machine.new(
-                      rotors:           deep_clone_rotors(rotors_combo),
-                      reflector:        @reflector,
-                      plugboard:        @plugboard,
-                      ring_settings:    ring_settings,
-                      start_positions:  start_positions
-                    )
-                    snippet = machine.decrypt(@ciphertext[0...@crib.length])
-                    next unless matches_crib?(snippet, @crib)
-                    machine.reset_to_created
-                    full_plain = machine.decrypt(@ciphertext)
+        machine.reset_to_created
+        full_plain = machine.decrypt(@ciphertext)
 
-                    return {
-                      rotors:          rotors_combo,
-                      ring_settings:   ring_settings,
-                      start_positions: start_positions,
-                      snippet:         snippet,
-                      plaintext:       full_plain
-                    }
-                  end
-                end
-              end
-            end
-          end
-        end
+        return {
+          rotors:          rotors_combo,
+          ring_settings:   @ring_settings,
+          start_positions: @start_positions,
+          snippet:         snippet,
+          plaintext:       full_plain
+        }
       end
 
       nil
@@ -57,7 +45,7 @@ module EnigmaMachine
     end
 
     def deep_clone_rotors(rotors)
-      rotors.map { |rotor| rotor.clone } 
+      rotors.map { |rotor| rotor.clone }
     end
 
     def matches_crib?(decrypted_text, crib)
