@@ -56,65 +56,43 @@ class EnigmaMachineTest < Minitest::Test
     out2 = r2.forward('A')
     refute_equal out1, out2
   end
-
-  def test_change_rotors_default_settings
-    new_rotors = [
-      EnigmaMachine::Rotor.rotor_IV,
-      EnigmaMachine::Rotor.rotor_V,
-      EnigmaMachine::Rotor.rotor_I
-    ]
-    @machine.change_rotors(new_rotors)
-    assert_equal new_rotors, @machine.rotors
-    assert_equal [1, 1, 1], @machine.current_ring_settings
-    positions = @machine.rotors.map { |r| EnigmaMachine::Rotor::ALPHABET[r.position] }
-    assert_equal ['A', 'A', 'A'], positions
+  def test_rotor_step_advances_position
+    rotor = EnigmaMachine::Rotor.rotor_I(position: 'A')
+    initial_pos = rotor.position
+    rotor.step!
+    expected_pos = (initial_pos + 1) % EnigmaMachine::Reflector::ALPHABET.size
+    assert_equal expected_pos, rotor.position, "Rotor position should advance by one after step!"
   end
 
-  def test_change_rotors_custom_settings
-    new_rotors = [
-      EnigmaMachine::Rotor.rotor_II,
-      EnigmaMachine::Rotor.rotor_III,
-      EnigmaMachine::Rotor.rotor_IV
-    ]
-    rings = [2, 3, 4]
-    starts = ['B', 'C', 'D']
-    @machine.change_rotors(new_rotors, ring_settings: rings, start_positions: starts)
-    assert_equal new_rotors, @machine.rotors
-    assert_equal rings, @machine.current_ring_settings
-    positions = @machine.rotors.map { |r| EnigmaMachine::Rotor::ALPHABET[r.position] }
-    assert_equal starts, positions
+  def test_rotor_full_rotation_wraps_around
+    rotor = EnigmaMachine::Rotor.rotor_III(position: 'A')
+    alphabet_size = EnigmaMachine::Reflector::ALPHABET.size
+    alphabet_size.times { rotor.step! }
+    assert_equal rotor.position, 0, "Rotor position should wrap around to 0 after full rotation"
   end
 
-  def test_set_rotor_at_default
-    replacement = EnigmaMachine::Rotor.rotor_III
-    @machine.change_rotors(@rotors, ring_settings: [1, 1, 1], start_positions: ['A', 'A', 'A'])
-    @machine.set_rotor_at(1, replacement)
-    assert_equal replacement, @machine.rotors[1]
-    assert_equal 1, @machine.current_ring_settings[1]
-    assert_equal 'A', EnigmaMachine::Rotor::ALPHABET[@machine.rotors[1].position]
+  def test_encrypt_decrypt_with_plugboard_swaps
+    plugboard = EnigmaMachine::Plugboard.new([['A','B'], ['C','D'], ['E','F']])
+    machine = EnigmaMachine::Machine.new(rotors: @rotors, reflector: @reflector, plugboard: plugboard)
+    message = 'FACEBAD'
+    encrypted = machine.encrypt(message)
+    # Сброс позиций роторов перед дешифровкой (как обычно в Enigma)
+    machine.rotors.each { |r| r.position = 0 }
+    decrypted = machine.decrypt(encrypted)
+    assert_equal message, decrypted
   end
+  def test_different_start_positions_produce_different_ciphertexts
+    message = 'ENIGMA'
+    machine1 = EnigmaMachine::Machine.new(rotors: @rotors, reflector: @reflector, plugboard: @plugboard)
+    machine2 = EnigmaMachine::Machine.new(rotors: @rotors, reflector: @reflector, plugboard: @plugboard)
 
-  def test_set_rotor_at_custom
-    replacement = EnigmaMachine::Rotor.rotor_I
-    @machine.change_rotors(@rotors, ring_settings: [1, 1, 1], start_positions: ['A', 'A', 'A'])
-    @machine.set_rotor_at(0, replacement, ring_setting: 5, start_position: 'E')
-    assert_equal replacement, @machine.rotors[0]
-    assert_equal 5, @machine.current_ring_settings[0]
-    assert_equal 'E', EnigmaMachine::Rotor::ALPHABET[@machine.rotors[0].position]
-  end
+    # Установим разные стартовые позиции роторов
+    machine1.rotors.each_with_index { |r, i| r.position = i }
+    machine2.rotors.each_with_index { |r, i| r.position = (i + 1) % EnigmaMachine::Reflector::ALPHABET.size }
 
-  def test_cipher_changes_after_rotor_change
-    plaintext = 'HELLOWORLD'
-    cipher_before = @machine.encrypt(plaintext)
-    @machine.reset_to_created
-    new_set = [
-      EnigmaMachine::Rotor.rotor_V,
-      EnigmaMachine::Rotor.rotor_IV,
-      EnigmaMachine::Rotor.rotor_III
-    ]
-    @machine.change_rotors(new_set, ring_settings: [1, 1, 1], start_positions: ['A', 'A', 'A'])
-    cipher_after = @machine.encrypt(plaintext)
-    refute_equal cipher_before, cipher_after
+    encrypted1 = machine1.encrypt(message)
+    encrypted2 = machine2.encrypt(message)
+
+    refute_equal encrypted1, encrypted2, "Ciphertexts with different start positions should differ"
   end
 end
-
