@@ -5,7 +5,7 @@ module EnigmaMachine
 class Rotor
   ALPHABET = ('A'..'Z').to_a
 
-  attr_accessor :wiring, :notch, :ring_setting, :position
+  attr_accessor :wiring, :notch, :ring_setting, :position, :name
 
   def initialize(wiring:, notch:, ring_setting: 1, position: 'A')
     @wiring = wiring.chars  # массив из 26 символов, на которые происходит замена

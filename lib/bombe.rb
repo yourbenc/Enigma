@@ -14,26 +14,31 @@ module EnigmaMachine
           (1..26).each do |r2|
             (1..26).each do |r3|
               ring_settings = [r1, r2, r3]
+
               ('A'..'Z').each do |p1|
                 ('A'..'Z').each do |p2|
                   ('A'..'Z').each do |p3|
                     start_positions = [p1, p2, p3]
+
                     machine = EnigmaMachine::Machine.new(
-                      rotors: deep_clone_rotors(rotors_combo),
-                      reflector: @reflector,
-                      plugboard: @plugboard,
-                      ring_settings: ring_settings,
-                      start_positions: start_positions
+                      rotors:           deep_clone_rotors(rotors_combo),
+                      reflector:        @reflector,
+                      plugboard:        @plugboard,
+                      ring_settings:    ring_settings,
+                      start_positions:  start_positions
                     )
-                    decrypted = machine.decrypt(@ciphertext[0...@crib.length])
-                    if matches_crib?(decrypted, @crib)
-                      return {
-                        rotors: rotors_combo,
-                        ring_settings: ring_settings,
-                        start_positions: start_positions,
-                        decrypted: decrypted
-                      }
-                    end
+                    snippet = machine.decrypt(@ciphertext[0...@crib.length])
+                    next unless matches_crib?(snippet, @crib)
+                    machine.reset_to_created
+                    full_plain = machine.decrypt(@ciphertext)
+
+                    return {
+                      rotors:          rotors_combo,
+                      ring_settings:   ring_settings,
+                      start_positions: start_positions,
+                      snippet:         snippet,
+                      plaintext:       full_plain
+                    }
                   end
                 end
               end
@@ -41,6 +46,7 @@ module EnigmaMachine
           end
         end
       end
+
       nil
     end
 
@@ -52,11 +58,9 @@ module EnigmaMachine
 
     def deep_clone_rotors(rotors)
       rotors.map { |rotor| rotor.clone } 
-      # или любой способ глубокого клонирования, чтобы не менять исходники
     end
 
     def matches_crib?(decrypted_text, crib)
-      # Можно простой check на совпадение по подстроке или более сложный
       decrypted_text == crib
     end
   end

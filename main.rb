@@ -45,7 +45,7 @@ puts "Now, try to decrypt with TuringDecryptor!"
 
 # Конфигурация машины: роторы, отражатель, штекерная панель
 decryptor = EnigmaMachine::TuringDecryptor.new(
-  rotors:    [rotor1, rotor2, rotor3],
+  rotors:    [rotor2, rotor1, rotor3],
   reflector: reflector,
   plugboard: plugboard
 )
@@ -93,7 +93,7 @@ if bombe_result
   puts "Роторы: #{bombe_result[:rotors].map(&:name).join(', ')}"
   puts "Настройки кольца: #{bombe_result[:ring_settings].join(', ')}"
   puts "Стартовые позиции: #{bombe_result[:start_positions].join}"
-  puts "Дешифровка: #{bombe_result[:decrypted]}"
+  puts "Полный расшифрованный текст: #{bombe_result[:plaintext]}"
 else
   puts "Bombe не нашла подходящей конфигурации."
 end
