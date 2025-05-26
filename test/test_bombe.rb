@@ -122,5 +122,108 @@ def test_crack_with_different_ring_settings
   refute_nil result, 'Expected crack to find plaintext with different ring settings'
   assert_includes result[:plaintext], @crib
 end
+  # 8
+  def test_crack_finds_working_ring_settings
+    known_ring_settings = [3, 2, 5]
+    machine = Machine.new(
+      rotors:          @rotors,
+      reflector:       @reflector,
+      plugboard:       @plugboard,
+      ring_settings:   known_ring_settings,
+      start_positions: @start_positions
+    )
+    cipher = machine.encrypt(@plaintext)
+
+    result = @decryptor.crack(cipher, @crib, ring_range: 1..5)
+    refute_nil result, "Ожидаем, что crack найдёт какие-то рабочие настройки"
+
+    recovered = Machine.new(
+      rotors:          @rotors.map(&:dup),
+      reflector:       @reflector,
+      plugboard:       @plugboard,
+      ring_settings:   result[:ring_settings],
+      start_positions: result[:start_positions]
+    )
+    decoded = recovered.decrypt(cipher)
+
+    assert_equal @plaintext, decoded,
+                 "С возвращёнными настройками не удаётся восстановить исходный plaintext"
+
+    assert_includes decoded, @crib
+  end
+
+  #9
+  def test_crack_finds_correct_start_positions
+    known_start_positions = ['L', 'M', 'N']
+    machine = Machine.new(
+      rotors: @rotors,
+      reflector: @reflector,
+      plugboard: @plugboard,
+      ring_settings: @ring_settings,
+      start_positions: known_start_positions
+    )
+    cipher = machine.encrypt(@plaintext)
+
+    # ring_range: только одно значение (по умолчанию — [1, 1, 1])
+    result = @decryptor.crack(cipher, @crib)
+
+    refute_nil result, 'Expected to find correct start positions'
+    assert_equal known_start_positions, result[:start_positions], 'Start positions do not match'
+    assert_includes result[:plaintext], @crib
+  end
+
+  #10
+  def test_crack_returns_working_ring_and_start
+    known_ring_settings   = [4, 5, 6]
+    known_start_positions = ['X', 'Y', 'Z']
+
+    machine = Machine.new(
+      rotors:          @rotors,
+      reflector:       @reflector,
+      plugboard:       @plugboard,
+      ring_settings:   known_ring_settings,
+      start_positions: known_start_positions
+    )
+    cipher = machine.encrypt(@plaintext)
+    result = @decryptor.crack(cipher, @crib, ring_range: 4..6)
+    refute_nil result, "Ожидаем, что crack найдёт какие-то рабочие настройки"
+
+    recovered = Machine.new(
+      rotors:          @rotors.map(&:dup),
+      reflector:       @reflector,
+      plugboard:       @plugboard,
+      ring_settings:   result[:ring_settings],
+      start_positions: result[:start_positions]
+    )
+    decoded = recovered.decrypt(cipher)
+    assert_equal @plaintext, decoded, "С возвращёнными настройками не удаётся восстановить исходный plaintext"
+    assert_includes decoded, @crib
+  end
+
+  # 11
+  def test_crack_respects_ring_range
+    known_ring_settings   = [4, 5, 6]
+    known_start_positions = ['X', 'Y', 'Z']
+
+    # шифруем с кольцами 4,5,6
+    machine = Machine.new(
+      rotors:          @rotors,
+      reflector:       @reflector,
+      plugboard:       @plugboard,
+      ring_settings:   known_ring_settings,
+      start_positions: known_start_positions
+    )
+    cipher = machine.encrypt(@plaintext)
+    result = @decryptor.crack(cipher, @crib, ring_range: 1..3)
+    if result.nil?
+      assert_nil result, "При ring_range 1..3 не ожидалось никакой конфигурации"
+    else
+      assert result[:ring_settings].all? { |r| (1..3).cover?(r) },
+             "Найденные ring_settings #{result[:ring_settings].inspect} выходят за рамки 1..3"
+      assert_includes result[:plaintext], @crib,
+                      "Если возвращён результат, то plaintext должен содержать crib"
+    end
+  end
+
 end
 

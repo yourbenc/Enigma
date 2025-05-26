@@ -30,7 +30,7 @@ module EnigmaMachine
                     raise "Превышено максимальное число попыток: #{max_attempts}"
                   end
 
-                  machine.reset_to_factory
+                  machine.reset_to_created
                   machine.set_start_position(0, p0)
                   machine.set_start_position(1, p1)
                   machine.set_start_position(2, p2)
