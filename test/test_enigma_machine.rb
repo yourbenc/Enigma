@@ -56,5 +56,65 @@ class EnigmaMachineTest < Minitest::Test
     out2 = r2.forward('A')
     refute_equal out1, out2
   end
+
+  def test_change_rotors_default_settings
+    new_rotors = [
+      EnigmaMachine::Rotor.rotor_IV,
+      EnigmaMachine::Rotor.rotor_V,
+      EnigmaMachine::Rotor.rotor_I
+    ]
+    @machine.change_rotors(new_rotors)
+    assert_equal new_rotors, @machine.rotors
+    assert_equal [1, 1, 1], @machine.current_ring_settings
+    positions = @machine.rotors.map { |r| EnigmaMachine::Rotor::ALPHABET[r.position] }
+    assert_equal ['A', 'A', 'A'], positions
+  end
+
+  def test_change_rotors_custom_settings
+    new_rotors = [
+      EnigmaMachine::Rotor.rotor_II,
+      EnigmaMachine::Rotor.rotor_III,
+      EnigmaMachine::Rotor.rotor_IV
+    ]
+    rings = [2, 3, 4]
+    starts = ['B', 'C', 'D']
+    @machine.change_rotors(new_rotors, ring_settings: rings, start_positions: starts)
+    assert_equal new_rotors, @machine.rotors
+    assert_equal rings, @machine.current_ring_settings
+    positions = @machine.rotors.map { |r| EnigmaMachine::Rotor::ALPHABET[r.position] }
+    assert_equal starts, positions
+  end
+
+  def test_set_rotor_at_default
+    replacement = EnigmaMachine::Rotor.rotor_III
+    @machine.change_rotors(@rotors, ring_settings: [1, 1, 1], start_positions: ['A', 'A', 'A'])
+    @machine.set_rotor_at(1, replacement)
+    assert_equal replacement, @machine.rotors[1]
+    assert_equal 1, @machine.current_ring_settings[1]
+    assert_equal 'A', EnigmaMachine::Rotor::ALPHABET[@machine.rotors[1].position]
+  end
+
+  def test_set_rotor_at_custom
+    replacement = EnigmaMachine::Rotor.rotor_I
+    @machine.change_rotors(@rotors, ring_settings: [1, 1, 1], start_positions: ['A', 'A', 'A'])
+    @machine.set_rotor_at(0, replacement, ring_setting: 5, start_position: 'E')
+    assert_equal replacement, @machine.rotors[0]
+    assert_equal 5, @machine.current_ring_settings[0]
+    assert_equal 'E', EnigmaMachine::Rotor::ALPHABET[@machine.rotors[0].position]
+  end
+
+  def test_cipher_changes_after_rotor_change
+    plaintext = 'HELLOWORLD'
+    cipher_before = @machine.encrypt(plaintext)
+    @machine.reset_to_created
+    new_set = [
+      EnigmaMachine::Rotor.rotor_V,
+      EnigmaMachine::Rotor.rotor_IV,
+      EnigmaMachine::Rotor.rotor_III
+    ]
+    @machine.change_rotors(new_set, ring_settings: [1, 1, 1], start_positions: ['A', 'A', 'A'])
+    cipher_after = @machine.encrypt(plaintext)
+    refute_equal cipher_before, cipher_after
+  end
 end
 

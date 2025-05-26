@@ -72,6 +72,33 @@ class Machine
     message.upcase.chars.map { |c| encrypt_char(c) }.join
   end
 
+  def change_rotors(new_rotors, ring_settings: nil, start_positions: nil)
+    @rotors = new_rotors
+    default_ring = Array.new(@rotors.size, 1)
+    default_start = Array.new(@rotors.size, 'A')
+
+    @created_ring_settings = ring_settings ? ring_settings.dup : default_ring
+    @created_positions     = start_positions     ? start_positions.dup     : default_start
+
+    @rotors.each_with_index do |rotor, i|
+      rotor.ring_setting = @created_ring_settings[i] - 1
+      rotor.position     = Rotor::ALPHABET.index(@created_positions[i])
+    end
+  end
+
+  def set_rotor_at(index, new_rotor, ring_setting: nil, start_position: nil)
+    @rotors[index] = new_rotor
+
+    rs = ring_setting || (@created_ring_settings[index] || 1)
+    sp = start_position || (@created_positions[index]     || 'A')
+
+    new_rotor.ring_setting = rs - 1
+    new_rotor.position     = Rotor::ALPHABET.index(sp)
+
+    @created_ring_settings[index] = rs
+    @created_positions[index]     = sp
+  end
+
   # Чтобы работало, нужно чтобы роторы были в том же положении, как при начале кодировки
   def decrypt(message)
     encrypt(message)

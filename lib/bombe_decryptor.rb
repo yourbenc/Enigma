@@ -1,7 +1,6 @@
 require_relative "enigma_machine"
 
 module EnigmaMachine
-  # Дешифровальная машина "TuringDecryptor" на основе known-plaintext атаки (crib)
   class TuringDecryptor
     def initialize(rotors:, reflector:, plugboard: Plugboard.new)
       @base_rotors = rotors
