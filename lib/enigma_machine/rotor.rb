@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # первым ротором считается самый правый
 
+module EnigmaMachine
 class Rotor
   ALPHABET = ('A'..'Z').to_a
 
@@ -51,4 +52,5 @@ class Rotor
     wired_index = wiring.index(ALPHABET[index])
     ALPHABET[(wired_index - position + ring_setting) % 26]
   end
+end
 end

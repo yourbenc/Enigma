@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+module EnigmaMachine
 class Plugboard
   attr_reader :mapping
 
@@ -16,4 +17,5 @@ class Plugboard
   def swap(c)
     mapping[c]
   end
+end
 end

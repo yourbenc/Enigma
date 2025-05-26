@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-class EnigmaMachine
+module EnigmaMachine
+class Machine
   # временно
   attr_accessor :rotors
-  def initialize(rotors:, reflector:, plugboard: Plugboard.new, ring_settings: nil)
+  def initialize(rotors:, reflector:, plugboard: Plugboard.new, ring_settings: nil, start_positions: nil)
     @rotors = rotors  # слева направо
     @reflector = reflector
     @plugboard = plugboard
@@ -75,4 +76,5 @@ class EnigmaMachine
   def decrypt(message)
     encrypt(message)
   end
+end
 end

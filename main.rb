@@ -1,16 +1,13 @@
   # frozen_string_literal: true
-  require_relative 'rotor'
-  require_relative 'reflector'
-  require_relative 'plugboard'
-  require_relative 'enigma_machine'
+  require_relative 'lib/enigma_machine'
 
-  rotor1 = Rotor.rotor_I
-  rotor2 = Rotor.rotor_II
-  rotor3 = Rotor.rotor_III
-  reflector = Reflector.reflector_A
-  plugboard = Plugboard.new([['A','M'],['F','I'],['N','V'],['P','S'],['T','U'],['W','Z']])
+  rotor1 = EnigmaMachine::Rotor.rotor_I
+  rotor2 = EnigmaMachine::Rotor.rotor_II
+  rotor3 = EnigmaMachine::Rotor.rotor_III
+  reflector = EnigmaMachine::Reflector.reflector_A
+  plugboard = EnigmaMachine::Plugboard.new([['A','M'],['F','I'],['N','V'],['P','S'],['T','U'],['W','Z']])
 
-  machine = EnigmaMachine.new(
+  machine = EnigmaMachine::Machine.new(
     rotors: [rotor1, rotor2, rotor3],
     reflector: reflector,
     plugboard: plugboard

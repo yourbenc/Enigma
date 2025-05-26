@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+module EnigmaMachine
 class Reflector
   ALPHABET = ('A'..'Z').to_a
 
@@ -25,4 +26,5 @@ class Reflector
   def reflect(c)
     wiring[ALPHABET.index(c)]
   end
+end
 end
